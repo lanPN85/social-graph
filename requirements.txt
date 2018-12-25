@@ -2,4 +2,6 @@ networkx
 tqdm
 numpy
 logzero
+scipy
 pytest
+graphviz
