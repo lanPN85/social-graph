@@ -2,3 +2,5 @@ venv/
 **/*.pyc
 *.zip
 *.gz
+.idea/
+.vscode/
