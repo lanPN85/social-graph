@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from logzero import logger
 
 from sgraph import loader, conversions, visual, cluster
-from sgraph.output import save_clusters
+from sgraph.output import save_clusters, save_edges
 
 CONVERTERS = {
     'naive': conversions.naive_conversion
@@ -69,6 +69,11 @@ if __name__ == "__main__":
         out_path = os.path.join(args.outdir, out_name)
         logger.info('Saving clusters to %s' % out_path)
         save_clusters(clusters, out_path)
+
+        out_name = 'graph-%d.txt'
+        out_path = os.path.join(args.outdir, out_name)
+        logger.info('Saving graph edges to %s' % out_path)
+        save_edges(g, out_path)
 
         logger.info('Rendering %d clusters' % len(clusters))
         visual.render_clusters(g, clusters, outdir=args.outdir,
