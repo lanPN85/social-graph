@@ -11,7 +11,10 @@ from sgraph import loader, conversions, visual, cluster
 from sgraph.output import save_clusters, save_edges
 
 CONVERTERS = {
-    'naive': conversions.naive_conversion
+    'naive': conversions.naive_conversion,
+    'tsymm': conversions.transpose_symmetric_conversion,
+    'rwsymm': conversions.random_walk_symmetric_conversion,
+    'bisymm': conversions.biblio_symmetric_conversion
 }
 
 CLUSTERERS = {
@@ -37,6 +40,7 @@ if __name__ == "__main__":
     if args.outdir is None:
         inp_name = os.path.split(args.input)[-1].split('.')[:-1]
         inp_name = '.'.join(inp_name)
+        inp_name += '-%s-%s' % (args.converter, args.clusterer)
         args.outdir = os.path.join('out/', inp_name)
 
     os.makedirs(args.outdir, exist_ok=True)
