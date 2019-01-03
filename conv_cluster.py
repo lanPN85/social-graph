@@ -23,13 +23,15 @@ CLUSTERERS = {
 
 
 def parse_arguments():
-    parser = ArgumentParser()
+    parser = ArgumentParser(description='''
+        Detects communities in the input digraph by first converting to a undirected graph, then applying undirected clustering.
+    ''')
 
     parser.add_argument('-i', '--input', default='data/twitter/twitter-combined.txt')
     parser.add_argument('-o', '--outdir', default=None)
     parser.add_argument('-p', '--partitions', type=int, default=8)
-    parser.add_argument('-co', '--converter', default='naive', help=str(list(CONVERTERS.keys())))
-    parser.add_argument('-cl', '--clusterer', default='laplacian', help=str(list(CLUSTERERS.keys())))
+    parser.add_argument('-co', '--converter', default='naive', help='|'.join(list(CONVERTERS.keys())))
+    parser.add_argument('-cl', '--clusterer', default='laplacian', help='|'.join(list(CLUSTERERS.keys())))
     parser.add_argument('-e', '--engine', default='neato')
 
     return parser.parse_args()
