@@ -5,3 +5,7 @@ logzero
 scipy
 pytest
 graphviz
+dash
+dash-html-components
+dash-core-components
+dash-table
