@@ -191,4 +191,4 @@ if __name__ == "__main__":
 
     if args.port is None:
         args.port = find_free_port()
-    app.run_server(port=args.port)
+    app.run_server(port=args.port, host='0.0.0.0')
