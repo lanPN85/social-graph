@@ -5,10 +5,11 @@ import logzero
 import json
 import networkx as nx
 
+from collections import OrderedDict
 from argparse import ArgumentParser
 from logzero import logger
 
-from sgraph import loader
+from sgraph import loader, metrics as ms
 
 
 def parse_arguments():
@@ -33,14 +34,17 @@ if __name__ == "__main__":
 
     g = loader.load_raw_graph(os.path.join(args.logdir, 'graph.txt'))
     has_feats = args.feats is not None and args.featnames is not None
+    feat_names = []
+
     if has_feats:
         logger.info('Loading features')
-        loader.add_node_feats(g, args.feats, args.featnames)
+        feat_names = loader.add_node_feats(g, args.feats, args.featnames)
     
     clpath = os.path.join(args.logdir, 'clusters.txt')
     clusters = loader.load_clusters(clpath)
 
-    metrics, props = {}, []
+    metrics, props = OrderedDict(), []
+    FEAT_K = 5
     
     # Node count
     logger.info('Logging node count')
@@ -52,16 +56,31 @@ if __name__ == "__main__":
     logger.info('Logging cluster count')
     metrics['# clusters'] = len(clusters)
 
+    if has_feats:
+        # Top features
+        logger.info('Getting top %d features' % FEAT_K)
+        top_k = ms.top_k_feats(g, feat_names, k=FEAT_K)
+        top_ks = []
+        for i, (feat, count) in enumerate(top_k):
+            top_ks.append('%s(%d)' % (feat, count))
+        metrics['Top %d Features' % FEAT_K] = top_ks
+
     for i, cl in enumerate(clusters):
         logger.info('Getting props for cluster %d/%d' % (i+1, len(clusters)))
         gx = g.subgraph(cl)
-        pr = {}
+        pr = OrderedDict()
 
         # Cluster node count
         pr['# nodes'] = gx.number_of_nodes()
         # Cluster edge count
         pr['# edges'] = gx.number_of_edges()
-
+        if has_feats:
+            # Top features
+            top_k = ms.top_k_feats(gx, feat_names, k=FEAT_K)
+            top_ks = []
+            for i, (feat, count) in enumerate(top_k):
+                top_ks.append('%s(%d)' % (feat, count))
+            pr['Top %d Features' % FEAT_K] = top_ks
         props.append(pr)
 
     mpath = os.path.join(args.outdir, 'metrics.json')

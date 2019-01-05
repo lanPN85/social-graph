@@ -11,6 +11,8 @@ import dash_core_components as dcc
 import dash_table as dt
 import dash_html_components as html
 
+from collections import OrderedDict
+
 from argparse import ArgumentParser
 from logzero import logger
 
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     if os.path.exists(mpath):
         logger.info('Loading metrics')
         with open(mpath, 'rt') as f:
-            metrics = json.load(f)
+            metrics = json.load(f, object_pairs_hook=OrderedDict)
     else:
         logger.warning('No metrics file found. Metrics won\'t be shown.')
     
@@ -55,7 +57,7 @@ if __name__ == "__main__":
     if os.path.exists(ppath):
         logger.info('Loading cluster properties')
         with open(ppath, 'rt') as f:
-            props = json.load(f)
+            props = json.load(f, object_pairs_hook=OrderedDict)
     else:
         logger.warning('No props file found. Props won\'t be shown.')
 
@@ -71,6 +73,8 @@ if __name__ == "__main__":
     # Render metrics
     tab_metric = []
     for name, val in metrics.items():
+        if isinstance(val, list):
+            val = ', '.join(val)
         tab_metric.append({
             'Metric': name.capitalize(),
             'Value': val
@@ -78,13 +82,30 @@ if __name__ == "__main__":
 
     # Render props
     tab_props = []
-    prop_keys = []
+    prop_cols = []  
     for i, cl in enumerate(props):
         pr = {'Cluster': i + 1}
-        pr.update(cl)
-        prop_keys = list(cl.keys())
+        prop_cols = []
+        for k, v in cl.items():
+            if isinstance(v, list):
+                for i, x in enumerate(v):
+                    id_ = '%s_%d' % (k, i+1)
+                    pr[id_] = x
+                    prop_cols.append({
+                        'name': [k, '#%d' % (i+1,)], 'id': id_
+                    })
+            else:
+                pr[k] = v
+                prop_cols.append({
+                    'name': ['', k], 'id': k
+                })
+                    
+        # pr.update(cl)
+        # prop_keys = list(cl.keys())
         tab_props.append(pr)
-    prop_keys.insert(0, 'Cluster')
+    prop_cols.insert(0, {
+        'name': ['', 'Cluster'], 'id': 'Cluster'
+    })
 
     # Styles
     bg_color = '#424242'
@@ -112,30 +133,39 @@ if __name__ == "__main__":
                         {'id': 'Metric', 'name': 'Metric Name'},
                         {'id': 'Value', 'name': 'Value'}
                     ], style_table={
-                        'height': '300',
-                        'overflowY': 'auto'
-                    }, style_as_list_view=True,
-                    style_header={
-                        'fontWeight': 'bold'
+                        'height': '250',
+                        'overflowY': 'auto',
+                        'overflowX': 'auto'
+                    }, style_as_list_view=False,
+                    style_header_conditional=[
+                        {'if': {'column_id': 'Value'}, 'textAlign': 'left'}
+                    ], style_header={
+                        'fontWeight': 'bold',
+                        'textAlign': 'center'
                     }, style_cell={
                         'textAlign': 'left'
-                    })
+                    }, n_fixed_columns=1,
+                    n_fixed_rows=1)
             ], className='col-xs-4'),
             html.Div([
                 html.H2('Cluster Properties'),
                 dt.DataTable(data=tab_props,
                     id='prop_table',
-                    columns=[{'id': c, 'name': c} for c in prop_keys],
+                    columns=prop_cols,
+                    merge_duplicate_headers=True,
                     style_table={
-                        'height': '300',
+                        'height': '250',
+                        'width': '100%',
                         'overflowY': 'auto',
-                        'overflowX': 'auto'
-                    }, style_as_list_view=True,
+                        'overflowX': 'scroll'
+                    }, style_as_list_view=False,
                     style_header={
-                        'fontWeight': 'bold'
+                        'fontWeight': 'bold',
+                        'textAlign': 'center'
                     }, style_cell={
-                        'textAlign': 'left'
-                    })
+                        'textAlign': 'right',
+                        'minWidth': '100px'
+                    }, n_fixed_rows=2)
             ], className='col-xs-8', style={'border-left': '1px solid black'})
         ], className='row', style={
             'margin': '0 5px 0 5px',
@@ -154,7 +184,6 @@ if __name__ == "__main__":
             ], className='row')
         ], style={
             'margin': '0 5px 5px 5px', 
-            # 'border': '1px solid black',
             'padding': '5px'
         }),
         html.P(html.A('Powered by Dash', href='https://plot.ly/products/dash/', target='_blank'), className='text-right')
