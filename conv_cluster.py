@@ -23,14 +23,17 @@ CLUSTERERS = {
 
 
 def parse_arguments():
-    parser = ArgumentParser()
+    parser = ArgumentParser(description='''
+        Detects communities in the input digraph by first converting to a undirected graph, then applying undirected clustering.
+    ''')
 
     parser.add_argument('-i', '--input', default='data/twitter/twitter-combined.txt')
     parser.add_argument('-o', '--outdir', default=None)
     parser.add_argument('-p', '--partitions', type=int, default=8)
-    parser.add_argument('-co', '--converter', default='naive', help=str(list(CONVERTERS.keys())))
-    parser.add_argument('-cl', '--clusterer', default='laplacian', help=str(list(CLUSTERERS.keys())))
+    parser.add_argument('-co', '--converter', default='naive', help='|'.join(list(CONVERTERS.keys())))
+    parser.add_argument('-cl', '--clusterer', default='laplacian', help='|'.join(list(CLUSTERERS.keys())))
     parser.add_argument('-e', '--engine', default='neato')
+    parser.add_argument('-s', '--size', default='8,10')
 
     return parser.parse_args()
 
@@ -82,6 +85,9 @@ if __name__ == "__main__":
         }
         graph_attrs = {
             'clusterMode': 'global',
+            'size': args.size + '!',
+            'ratio': 'fill',
+            'pad': '1'
         }
         edge_attrs = {
             'arrowsize': '0.2',
@@ -90,8 +96,8 @@ if __name__ == "__main__":
         logger.info('Rendering %d clusters' % len(clusters))
         visual.render_clusters(g, clusters, outdir=outdir,
             name='clusters', no_label=True, node_attrs=node_attrs,
-            edge_attrs=edge_attrs, engine=args.engine)
+            edge_attrs=edge_attrs, engine=args.engine, graph_attrs=graph_attrs)
         logger.info('Rendering original graph')
         visual.render_graph(g, outdir=outdir, edge_attrs=edge_attrs,
             name='graph', no_label=True, node_attrs=node_attrs,
-            engine=args.engine)
+            engine=args.engine, graph_attrs=graph_attrs)

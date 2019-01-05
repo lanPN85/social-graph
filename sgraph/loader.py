@@ -35,11 +35,27 @@ def add_node_feats(graph, feat_path, feat_name_path, verbose=True):
             line = line.strip()
             comps = line.split(' ')
             uid = int(comps[0])
-
-            for i, c in enumerate(comps[1:]):
-                if graph.has_node(uid):
+            
+            if graph.has_node(uid):
+                for i, c in enumerate(comps[1:]):
                     graph.nodes[uid][feat_names[i]] = int(c)
-                else:
-                    logger.warning('Node %d not found')
+            else:
+                logger.warning('Node %d not found' % uid)
                 
     return feat_names
+
+
+def load_clusters(path):
+    clusters = []
+    with open(path, 'rt') as f:
+        cl = []
+        for line in f:
+            line = line.strip()
+            if line == '':
+                clusters.append(cl)
+                cl = []
+            elif not line.startswith('Cluster'):
+                cl.append(int(line))
+        if len(cl) > 0:
+            clusters.append(cl)
+    return clusters

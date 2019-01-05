@@ -7,7 +7,7 @@ from logzero import logger
 from networkx.drawing.nx_agraph import write_dot
 
 
-def render_graph(g, outdir='.', name='graph', format='pdf',
+def render_graph(g, outdir='.', name='graph', format='png',
                  engine='neato', no_label=False, node_attrs=None,
                  graph_attrs=None, edge_attrs=None):
     directional = isinstance(g, nx.DiGraph)
@@ -28,7 +28,7 @@ def render_graph(g, outdir='.', name='graph', format='pdf',
     g_.render()
 
 
-def render_clusters(g, clusters, outdir='.', name='graph', format='pdf',
+def render_clusters(g, clusters, outdir='.', name='graph', format='png',
                     engine='neato', no_label=False, node_attrs=None, 
                     graph_attrs=None, edge_attrs=None):
     directional = isinstance(g, nx.DiGraph)
