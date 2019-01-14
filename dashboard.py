@@ -77,6 +77,9 @@ if __name__ == "__main__":
     for name, val in metrics.items():
         if isinstance(val, list):
             val = ', '.join(val)
+        elif isinstance(val, float):
+            val = '%.4f' % val
+
         tab_metric.append({
             'Metric': name.capitalize(),
             'Value': val

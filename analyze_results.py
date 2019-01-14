@@ -55,6 +55,12 @@ if __name__ == "__main__":
     # Cluster count
     logger.info('Logging cluster count')
     metrics['# clusters'] = len(clusters)
+    # Coverage
+    logger.info('Calculating coverage')
+    metrics['Coverage'] = ms.coverage(g, clusters)
+    # Performance
+    logger.info('Calculating performance')
+    metrics['Performance'] = ms.performance(g, clusters)
 
     if has_feats:
         # Top features
