@@ -18,7 +18,8 @@ CONVERTERS = {
 }
 
 CLUSTERERS = {
-    'laplacian': cluster.laplacian_cluster
+    'laplacian': cluster.laplacian_cluster,
+    'gn': cluster.girvan_newman
 }
 
 

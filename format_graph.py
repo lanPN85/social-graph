@@ -44,8 +44,10 @@ if __name__ == "__main__":
     if args.format not in FORMATS.keys():
         raise ValueError('Invalid format `%s`' % args.format)
 
+    logger.info('Loading graph')
     g = load_raw_graph(args.input)
     if args.converter is not None:
+        logger.info('Converting to undirected')
         g = CONVERTERS[args.converter](g)
 
     if args.output is None:

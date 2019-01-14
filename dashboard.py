@@ -42,6 +42,8 @@ if __name__ == "__main__":
     args = parse_arguments()
     logzero.logfile('logs/dashboard.log', mode='w')
     shutil.copy2('static/favicon.ico', os.path.join(args.logdir, 'favicon.ico'))
+    if args.port is None:
+        args.port = find_free_port()
 
     metrics = {}
     mpath = os.path.join(args.logdir, 'metrics.json')
@@ -99,9 +101,6 @@ if __name__ == "__main__":
                 prop_cols.append({
                     'name': ['', k], 'id': k
                 })
-                    
-        # pr.update(cl)
-        # prop_keys = list(cl.keys())
         tab_props.append(pr)
     prop_cols.insert(0, {
         'name': ['', 'Cluster'], 'id': 'Cluster'
@@ -112,7 +111,7 @@ if __name__ == "__main__":
     txt_color = 'white'
 
     # Declare layout
-    app.title = 'Community Detection'
+    app.title = '[%d] Community Detection' % args.port
     app.layout = html.Div([
         html.Div([
             html.H2(html.B('Community Visualization')),
@@ -133,9 +132,10 @@ if __name__ == "__main__":
                         {'id': 'Metric', 'name': 'Metric Name'},
                         {'id': 'Value', 'name': 'Value'}
                     ], style_table={
-                        'height': '250',
+                        'overflowX': 'scroll',
                         'overflowY': 'auto',
-                        'overflowX': 'auto'
+                        'maxHeight': 'none',
+                        'maxWidth': 'none'
                     }, style_as_list_view=False,
                     style_header_conditional=[
                         {'if': {'column_id': 'Value'}, 'textAlign': 'left'}
@@ -146,7 +146,10 @@ if __name__ == "__main__":
                         'textAlign': 'left'
                     }, n_fixed_columns=1,
                     n_fixed_rows=1)
-            ], className='col-xs-4'),
+            ], className='col-xs-4', style={
+                'border-right': '1px solid black',
+                'height': '400px',
+            }),
             html.Div([
                 html.H2('Cluster Properties'),
                 dt.DataTable(data=tab_props,
@@ -154,10 +157,9 @@ if __name__ == "__main__":
                     columns=prop_cols,
                     merge_duplicate_headers=True,
                     style_table={
-                        'height': '250',
-                        'width': '100%',
-                        'overflowY': 'auto',
-                        'overflowX': 'scroll'
+                        'overflowX': 'scroll',
+                        'overflowY': 'visible',
+                        'maxHeight': 'none'
                     }, style_as_list_view=False,
                     style_header={
                         'fontWeight': 'bold',
@@ -166,10 +168,13 @@ if __name__ == "__main__":
                         'textAlign': 'right',
                         'minWidth': '100px'
                     }, n_fixed_rows=2)
-            ], className='col-xs-8', style={'border-left': '1px solid black'})
+            ], className='col-xs-8', style={
+                'height': '400px',
+                'overflowY': 'scroll'
+            })
         ], className='row', style={
             'margin': '0 5px 0 5px',
-            'border-bottom': '1px solid black'
+            'border-bottom': '1px solid black',
         }),
         html.Div([
             html.H2('Graphs'),
@@ -189,6 +194,4 @@ if __name__ == "__main__":
         html.P(html.A('Powered by Dash', href='https://plot.ly/products/dash/', target='_blank'), className='text-right')
     ], className='container-fluid')
 
-    if args.port is None:
-        args.port = find_free_port()
     app.run_server(port=args.port, host='0.0.0.0')
